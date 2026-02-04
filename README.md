@@ -2,6 +2,8 @@
 
 A browser-based Sudoku solver using the Z3 theorem prover.
 
+**Live Demo:** <https://msakai.github.io/sudoku-z3-wasm/>
+
 ## Requirements
 
 - Node.js >= 16
@@ -10,14 +12,6 @@ A browser-based Sudoku solver using the Z3 theorem prover.
 
 ```bash
 npm install
-```
-
-After installation, copy the Z3 WASM files to the public directory:
-
-```bash
-mkdir -p public
-cp node_modules/z3-solver/build/z3-built.js public/
-cp node_modules/z3-solver/build/z3-built.wasm public/
 ```
 
 ## Usage
@@ -37,19 +31,36 @@ npm run build
 npm run preview
 ```
 
+The build process automatically copies Z3 WASM files and coi-serviceworker to the output directory.
+
+## Deployment
+
+### GitHub Pages
+
+This project is configured for automatic deployment to GitHub Pages via GitHub Actions.
+
+1. Enable GitHub Pages in repository settings (Settings > Pages > Source: "GitHub Actions")
+2. Push to the `main` branch
+3. The workflow automatically builds and deploys to <https://msakai.github.io/sudoku-z3-wasm/>
+
+**Note:** GitHub Pages cannot set custom HTTP headers. The app uses [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) to inject the required COOP/COEP headers client-side, enabling `SharedArrayBuffer` for Z3. On the first visit, the page will reload once as the service worker registers.
+
 ## File Structure
 
 ```
 sudoku-z3/
-├── index.html          # Main HTML with UI and z3-built.js loader
-├── package.json        # Dependencies (z3-solver, vite)
-├── vite.config.js      # Vite config with COOP/COEP headers
-├── public/
-│   ├── z3-built.js     # Z3 WASM loader (copied from node_modules)
-│   └── z3-built.wasm   # Z3 WASM binary (~33MB)
+├── index.html              # Main HTML with UI and script loaders
+├── package.json            # Dependencies (z3-solver, vite, coi-serviceworker)
+├── vite.config.js          # Vite config with COOP/COEP headers and base path
+├── .github/workflows/
+│   └── deploy.yml          # GitHub Actions workflow for GitHub Pages
+├── public/                 # Static files (copied during build)
+│   ├── coi-serviceworker.js # Service worker for COOP/COEP headers
+│   ├── z3-built.js         # Z3 WASM loader
+│   └── z3-built.wasm       # Z3 WASM binary (~33MB)
 └── src/
-    ├── main.js         # UI and grid management
-    └── solver.js       # Sudoku solver using Z3
+    ├── main.js             # UI and grid management
+    └── solver.js           # Sudoku solver using Z3
 ```
 
 ## How It Works
@@ -64,5 +75,8 @@ The Sudoku puzzle is encoded as a constraint satisfaction problem and solved usi
 
 ## Notes
 
-- Z3-solver requires `SharedArrayBuffer`, which needs special HTTP headers (COOP/COEP). Vite is configured to serve these headers automatically.
+- Z3-solver requires `SharedArrayBuffer`, which needs special HTTP headers (COOP/COEP):
+  - For local development, Vite serves these headers automatically.
+  - For GitHub Pages, coi-serviceworker injects the headers via a service worker.
 - The `z3-built.js` must be loaded via a script tag before the module imports, as it sets up `window.initZ3` required by z3-solver.
+- The `coi-serviceworker.js` must be loaded before `z3-built.js` to ensure headers are set first.

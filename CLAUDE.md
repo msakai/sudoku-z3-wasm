@@ -11,9 +11,6 @@ This is a browser-based Sudoku solver application using the Z3 theorem prover. T
 **Setup:**
 ```bash
 npm install
-mkdir -p public
-cp node_modules/z3-solver/build/z3-built.js public/
-cp node_modules/z3-solver/build/z3-built.wasm public/
 ```
 
 **Running the application:**
@@ -29,6 +26,19 @@ npm run build
 npm run preview
 ```
 
+The `npm run build` command automatically runs `copy-assets` which copies Z3 WASM files and coi-serviceworker from node_modules to the public directory.
+
+## Deployment
+
+**GitHub Pages:**
+
+- Automatic deployment via GitHub Actions on push to `main`
+- Workflow file: `.github/workflows/deploy.yml`
+- Live URL: <https://msakai.github.io/sudoku-z3-wasm/>
+
+**coi-serviceworker:**
+GitHub Pages cannot set custom HTTP headers. The app uses coi-serviceworker to inject COOP/COEP headers client-side via a service worker, enabling SharedArrayBuffer for Z3.
+
 ## Coding Guidelines
 
 **Language:** All text content, comments, and user-facing messages should be written in English unless explicitly instructed otherwise.
@@ -36,12 +46,15 @@ npm run preview
 ## Architecture
 
 **File structure:**
-- `index.html`: Main HTML with UI and z3-built.js loader
+
+- `index.html`: Main HTML with UI and script loaders
 - `src/main.js`: UI and grid management logic
 - `src/solver.js`: Z3-based Sudoku solver
+- `public/coi-serviceworker.js`: Service worker for COOP/COEP headers (copied from node_modules)
 - `public/z3-built.js`: Z3 WASM loader (copied from node_modules)
-- `public/z3-built.wasm`: Z3 WASM binary (~33MB)
-- `vite.config.js`: Vite config with COOP/COEP headers and global polyfill
+- `public/z3-built.wasm`: Z3 WASM binary (~33MB, copied from node_modules)
+- `vite.config.js`: Vite config with COOP/COEP headers, base path, and global polyfill
+- `.github/workflows/deploy.yml`: GitHub Actions workflow for GitHub Pages deployment
 
 **Key components in src/main.js:**
 
@@ -74,10 +87,21 @@ npm run preview
 
 **SharedArrayBuffer requirement:**
 Z3-solver uses WebAssembly threads which require `SharedArrayBuffer`. This needs special HTTP headers:
+
 - `Cross-Origin-Opener-Policy: same-origin`
 - `Cross-Origin-Embedder-Policy: require-corp`
 
-These are configured in `vite.config.js`.
+For local development, these are configured in `vite.config.js`. For GitHub Pages (which cannot set custom headers), coi-serviceworker injects these headers client-side via a service worker.
+
+**Script loading order:**
+Scripts in `index.html` must be loaded in this order:
+
+1. `coi-serviceworker.js` - Registers service worker for COOP/COEP headers
+2. `z3-built.js` - Sets up `window.initZ3` required by z3-solver
+3. `./src/main.js` (module) - Application entry point
 
 **Z3 initialization:**
 The `z3-built.js` must be loaded via a script tag before ES modules, as it sets up `window.initZ3` required by z3-solver's browser build.
+
+**GitHub Pages base path:**
+The `vite.config.js` uses a dynamic base path: `/sudoku-z3-wasm/` when `GITHUB_ACTIONS` env var is set, otherwise `/` for local development.
