@@ -4,6 +4,10 @@ A browser-based Sudoku solver using the Z3 theorem prover compiled to WebAssembl
 
 **Live Demo:** <https://msakai.github.io/sudoku-z3-wasm/>
 
+<p align="center">
+  <img src="screenshot.png" alt="Sudoku Solver Screenshot">
+</p>
+
 ## Requirements
 
 - Node.js >= 16
