@@ -1,4 +1,4 @@
 node_modules/
-public/z3-built.js
-public/z3-built.wasm
+dist/
+public/
 .claude/
