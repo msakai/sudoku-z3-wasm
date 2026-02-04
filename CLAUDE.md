@@ -39,6 +39,8 @@ The `npm run build` command automatically runs `copy-assets` which copies Z3 WAS
 **coi-serviceworker:**
 GitHub Pages cannot set custom HTTP headers. The app uses coi-serviceworker to inject COOP/COEP headers client-side via a service worker, enabling SharedArrayBuffer for Z3.
 
+The coi-serviceworker script checks `window.crossOriginIsolated` on load. If the headers are already set by the server (e.g., Vite dev server), `crossOriginIsolated` is `true` and the script does nothing. Only when `crossOriginIsolated` is `false` (e.g., on GitHub Pages) does it register the service worker and reload the page. This means the script is safe to include unconditionally without affecting environments that already have proper headers.
+
 ## Coding Guidelines
 
 **Language:** All text content, comments, and user-facing messages should be written in English unless explicitly instructed otherwise.
