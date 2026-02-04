@@ -1,6 +1,6 @@
-# Sudoku Solver (Z3)
+# A Sudoku solver using Z3 compiled to WASM
 
-A browser-based Sudoku solver using the Z3 theorem prover.
+A browser-based Sudoku solver using the Z3 theorem prover compiled to WebAssembly.
 
 **Live Demo:** <https://msakai.github.io/sudoku-z3-wasm/>
 
@@ -19,6 +19,7 @@ npm install
 ### Development
 
 ```bash
+npm run copy-assets
 npm run dev
 ```
 
