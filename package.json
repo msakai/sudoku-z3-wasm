@@ -4,13 +4,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "npm run copy-assets && vite build",
+    "preview": "vite preview",
+    "copy-assets": "mkdir -p public && cp node_modules/z3-solver/build/z3-built.js public/ && cp node_modules/z3-solver/build/z3-built.wasm public/ && cp node_modules/coi-serviceworker/coi-serviceworker.js public/"
   },
   "dependencies": {
     "z3-solver": "^4.13.0"
   },
   "devDependencies": {
+    "coi-serviceworker": "^0.1.7",
     "vite": "^5.0.0"
   }
 }
